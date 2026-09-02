@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="ALTR × Kessler's Diamond Center — Growth Dashboard">
+  <title>Kessler's Diamond Center · Growth Dashboard</title>
+
+  <!-- React + Babel CDN: this file can be hosted directly on GitHub Pages -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; min-height: 100%; }
+    body {
+      background: #faf9f7;
+      color: #1d1d1b;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    }
+    button, input, select { font: inherit; }
+    button { -webkit-tap-highlight-color: transparent; }
+    @media (max-width: 700px) {
+      body { font-size: 14px; }
+    }
+  </style>
+</head>
+
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+const { useState } = React;
+
+// ============================================================================
+//  ALTR × Kessler's Diamond Center — Growth Dashboard  (template)
+//  MONTHLY: inject data at __DATA__, update the version/date line in the header, and REWRITE every
+//  paragraph tagged /*NARRATIVE*/ from the new numbers — those sentences carry specific figures.
+//  Customer view: Overview · Programs · Momentum · What to Order · Stock Health · Playbook
+//  Internal view adds: ALTR Build (NY stock plan). Toggle in header.
+//  Ordering logic is computed fresh from the full SKU universe each month.
+// ============================================================================
+
+const D = {"PROGRAMS": [{"name": "Single Prong Band", "tag": "Core · Defend", "u": [172, 166, 96], "proj": 133, "r": [189598, 221321, 150173], "rproj": 208052}, {"name": "Shared Prong Band", "tag": "Core · Stabilizing", "u": [127, 138, 93], "proj": 134, "r": [168730, 214227, 189939], "rproj": 273675}, {"name": "Fashion Band", "tag": "Grow", "u": [3, 10, 26], "proj": 39, "r": [3599, 35066, 88507], "rproj": 132760}, {"name": "Silver Fashion Bracelet", "tag": "Grow", "u": [0, 54, 46], "proj": 69, "r": [0, 31335, 40499], "rproj": 60748}, {"name": "5 Stone Band", "tag": "Sunset", "u": [52, 47, 8], "proj": 13, "r": [146861, 144036, 23775], "rproj": 38634}], "SOROW": {"name": "Special Orders (ZZ styles)", "u": [10, 10, 12], "proj": 18, "r": [19594, 18158, 40463], "rproj": 60519}, "PM": {"Single Prong Band": {"2024": [9, 14, 18, 14, 16, 31, 16, 14, 9, 8, 9, 14], "2025": [10, 14, 18, 18, 14, 10, 13, 14, 10, 15, 8, 22], "2026": [18, 14, 9, 9, 14, 14, 13, 5, 0, 0, 0, 0]}, "Shared Prong Band": {"2024": [5, 19, 4, 14, 11, 10, 14, 12, 10, 9, 7, 12], "2025": [12, 8, 17, 19, 13, 9, 10, 3, 12, 7, 5, 23], "2026": [12, 9, 9, 10, 16, 13, 13, 11, 0, 0, 0, 0]}, "Fashion Band": {"2024": [0, 1, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0], "2025": [0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 8], "2026": [-1, 4, 3, 0, 5, 4, 5, 6, 0, 0, 0, 0]}, "Silver Fashion Bracelet": {"2024": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], "2025": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 39], "2026": [3, 7, 3, 2, 8, 9, 8, 6, 0, 0, 0, 0]}, "5 Stone Band": {"2024": [2, 0, 4, 6, 2, 2, 4, 5, 5, 6, 5, 11], "2025": [6, 4, 7, 6, 7, 3, 3, 5, 2, 2, 0, 2], "2026": [1, 0, 1, 1, 3, 1, 0, 1, 0, 0, 0, 0]}}, "TM": {"2024": [18, 34, 26, 36, 29, 44, 35, 33, 27, 24, 21, 37], "2025": [29, 26, 42, 43, 36, 26, 29, 22, 25, 24, 29, 94], "2026": [33, 36, 26, 24, 48, 44, 39, 31, 0, 0, 0, 0]}, "MET": {"Single Prong Band": {"ytd": {"WG": 82, "YG": 13, "RG": 0, "Silver": 0}, "d90": {"WG": 31, "YG": 2, "RG": 0, "Silver": 0}, "yg25": 32, "ygGrow": false}, "Shared Prong Band": {"ytd": {"WG": 75, "YG": 16, "RG": 1, "Silver": 0}, "d90": {"WG": 33, "YG": 4, "RG": 0, "Silver": 0}, "yg25": 17, "ygGrow": true}, "Fashion Band": {"ytd": {"WG": 13, "YG": 12, "RG": 1, "Silver": 0}, "d90": {"WG": 8, "YG": 6, "RG": 1, "Silver": 0}, "yg25": 3, "ygGrow": true}, "Silver Fashion Bracelet": {"ytd": {"WG": 0, "YG": 0, "RG": 0, "Silver": 46}, "d90": {"WG": 0, "YG": 0, "RG": 0, "Silver": 24}, "yg25": 0, "ygGrow": false}, "5 Stone Band": {"ytd": {"WG": 4, "YG": 4, "RG": 0, "Silver": 0}, "d90": {"WG": 2, "YG": 0, "RG": 0, "Silver": 0}, "yg25": 6, "ygGrow": false}}, "STOCK": [{"name": "Single Prong Band", "tag": "Core · Defend", "koh": 54, "oo": 37, "doh": 387, "aged": 3, "dead": 0, "risk": 1, "skus": 23, "active": 8}, {"name": "Shared Prong Band", "tag": "Core · Stabilizing", "koh": 37, "oo": 15, "doh": 94, "aged": 0, "dead": 0, "risk": 1, "skus": 21, "active": 5}, {"name": "Fashion Band", "tag": "Grow", "koh": 61, "oo": 30, "doh": 132, "aged": 0, "dead": 38, "risk": 0, "skus": 25, "active": 9}, {"name": "Silver Fashion Bracelet", "tag": "Grow", "koh": 24, "oo": 6, "doh": 20, "aged": 0, "dead": 0, "risk": 0, "skus": 5, "active": 4}, {"name": "5 Stone Band", "tag": "Sunset", "koh": 1, "oo": 0, "doh": 333, "aged": 0, "dead": 0, "risk": 0, "skus": 14, "active": 2}], "BUILD": [{"name": "Single Prong Band", "d90": 25, "d180": 21, "peak": 21, "oo": 37, "altr": 9}, {"name": "Shared Prong Band", "d90": 27, "d180": 23, "peak": 29, "oo": 15, "altr": 15}, {"name": "Fashion Band", "d90": 14, "d180": 8, "peak": 13, "oo": 30, "altr": 13}, {"name": "Silver Fashion Bracelet", "d90": 17, "d180": 13, "peak": 32, "oo": 6, "altr": 26}, {"name": "5 Stone Band", "d90": 2, "d180": 2, "peak": 1, "oo": 0, "altr": 0}], "MOM": [["AWDNB293554", "ZAB001-70II-A", "WG", "Shared Prong Band", 56, 23, 17, "up", 13, 1, "Covered"], ["AWDNB293556", "ZAB001-96II-A", "WG", "Shared Prong Band", 56, 33, 14, "stable", 7, 11, "Covered"], ["AWDNB322856", "ZAB034-30II-A", "WG", "Single Prong Band", 56, 22, 12, "up", 10, 20, "Covered"], ["SSBRC366740", "ZBR59-200EI-L", "Silver", "Silver Fashion Bracelet", 10, 20, 9, "new↑", 7, 0, "Watch"], ["AWDNB322858", "ZAB034-70II-A", "WG", "Single Prong Band", 56, 18, 6, "stable", 10, 12, "Covered"], ["SSBRC373687", "ZBR51-96II-L", "Silver", "Silver Fashion Bracelet", 4, 8, 6, "new↑", 6, 4, "Covered"], ["AWDNB322859", "ZAB034-100II-A", "WG", "Single Prong Band", 56, 16, 5, "stable", 10, 0, "Covered"], ["SSBRC373686", "ZBR54-96II-L", "Silver", "Silver Fashion Bracelet", 4, 5, 5, "new↑", 3, 2, "Watch"], ["AWDNB322857", "ZAB034-46II-A", "WG", "Single Prong Band", 56, 18, 4, "down", 8, 0, "Covered"], ["SSBRC366738", "ZBR53-100EI-L", "Silver", "Silver Fashion Bracelet", 10, 13, 4, "stable", 8, 0, "Covered"], ["AWDNB335580", "ZAB001-46II-B", "YG", "Shared Prong Band", 48, 5, 3, "up", 1, 0, "STOCK-OUT RISK"], ["AWDNB373682", "ZAB129-100EF-A", "WG", "Fashion Band", 4, 3, 3, "new↑", 2, 0, "Watch"], ["AWDNB293550", "ZAB001-46II-A", "WG", "Shared Prong Band", 56, 18, 2, "down", 13, 1, "Covered"], ["AWDNB322854", "ZAB034-18II-A", "WG", "Single Prong Band", 56, 6, 2, "up", 10, 5, "Covered"], ["AWDNB333333", "ZAB034-46II-B", "YG", "Single Prong Band", 50, 4, 2, "up", 1, 0, "STOCK-OUT RISK"], ["AWDNB366743", "ZAB113-250FF-B", "YG", "Fashion Band", 10, 4, 2, "new↑", 2, 0, "Covered"]], "NEW": [["SSBRC366740", "ZBR59-200EI-L", "Silver", "Silver Fashion Bracelet", 10, 20, 9, "new↑", 7, 0, 74, "Watch"], ["SSBRC366738", "ZBR53-100EI-L", "Silver", "Silver Fashion Bracelet", 10, 13, 4, "stable", 8, 0, 62, "Covered"], ["SSBRC373687", "ZBR51-96II-L", "Silver", "Silver Fashion Bracelet", 4, 8, 6, "new↑", 6, 4, 57, "Covered"], ["AWDNB366741", "ZAB001-146II-B", "YG", "Shared Prong Band", 10, 6, 1, "down", 1, 2, 86, "Covered"], ["SSBRC373686", "ZBR54-96II-L", "Silver", "Silver Fashion Bracelet", 4, 5, 5, "new↑", 3, 2, 62, "Watch"], ["AWDNB366743", "ZAB113-250FF-B", "YG", "Fashion Band", 10, 4, 2, "new↑", 2, 0, 67, "Covered"], ["AWDNB373682", "ZAB129-100EF-A", "WG", "Fashion Band", 4, 3, 3, "new↑", 2, 0, 60, "Watch"], ["AWDNB373676", "ZAB190-100EF-B", "YG", "Fashion Band", 4, 3, 2, "new↑", 3, 0, 50, "Covered"], ["AWDNB366745", "ZAB113-400FF-A", "WG", "Fashion Band", 10, 3, 1, "down", 1, 0, 75, "Watch"], ["AWDNB366742", "ZAB113-250FF-A", "WG", "Fashion Band", 10, 3, 0, "down", 2, 0, 60, "Idle"], ["AWDNB366746", "ZAB113-400FF-B", "YG", "Fashion Band", 10, 3, 0, "down", 2, 0, 60, "Idle"], ["AWDNB373681", "ZAB025-100EF-A", "WG", "Fashion Band", 4, 2, 2, "new↑", 3, 0, 40, "Covered"], ["AWDNB373683", "ZAB121-100EF-A", "WG", "Fashion Band", 4, 2, 2, "new↑", 3, 0, 40, "Covered"], ["AWDNB373677", "ZAB181-150EF-B", "YG", "Fashion Band", 4, 1, 1, "new↑", 2, 0, 33, "Watch"], ["AWDNB377889", "ZAB181-150EF-C", "RG", "Fashion Band", 1, 1, 1, "new↑", 0, 0, 100, "Watch"], ["AWDNB373678", "ZAB182-150EF-B", "YG", "Fashion Band", 4, 1, 1, "new↑", 3, 6, 25, "Watch"], ["—", "ZAB113-150FF-A", "WG", "Fashion Band", 6, 1, 0, "down", 0, 0, 100, "Idle"], ["AWDNB334363", "ZAB034-145GI-A", "WG", "Single Prong Band", 1, 0, 1, "new↑", 2, 0, 0, "Watch"], ["AWDNB329062", "YAB033-196II-A", "WG", "5 Stone Band", 1, 0, 0, "—", 1, 0, 0, "Idle"], ["AWDNB373680", "ZAB027-100EF-A", "WG", "Fashion Band", 4, 0, 0, "—", 3, 0, 0, "Dead stock"], ["AWDNB366747", "ZAB027-500FF-A", "WG", "Fashion Band", 10, 0, 0, "—", 5, 0, 0, "Dead stock"], ["AWDNB373685", "ZAB035-100EF-A", "WG", "Fashion Band", 4, 0, 0, "—", 3, 0, 0, "Dead stock"], ["AWDNB366748", "ZAB035-200FF-A", "WG", "Fashion Band", 10, 0, 0, "—", 4, 0, 0, "Dead stock"], ["AWDNB366753", "ZAB038-300IH-A", "WG", "Fashion Band", 10, 0, 0, "—", 6, 0, 0, "Dead stock"], ["AWDNB373684", "ZAB041-100EF-A", "WG", "Fashion Band", 4, 0, 0, "—", 4, 0, 0, "Dead stock"], ["AWDNB366750", "ZAB041-200HD-A", "WG", "Fashion Band", 10, 0, 0, "—", 3, 0, 0, "Dead stock"], ["AWDNB373679", "ZAB113-100EF-A", "WG", "Fashion Band", 4, 0, 0, "—", 4, 0, 0, "Dead stock"], ["AWDNB366752", "ZAB141-200EF-B", "YG", "Fashion Band", 10, 0, 0, "—", 3, 0, 0, "Dead stock"], ["AWDNB366749", "ZAB129-500EF-A", "WG", "Fashion Band", 10, -1, 0, "—", 3, 0, -50, "Dead stock"]], "DEAD": [["AWDNB366753", "ZAB038-300IH-A", "Fashion Band", 6, 0], ["AWDNB366747", "ZAB027-500FF-A", "Fashion Band", 5, 0], ["AWDNB373684", "ZAB041-100EF-A", "Fashion Band", 4, 0], ["AWDNB366748", "ZAB035-200FF-A", "Fashion Band", 4, 0], ["AWDNB373679", "ZAB113-100EF-A", "Fashion Band", 4, 0], ["AWDNB373680", "ZAB027-100EF-A", "Fashion Band", 3, 0], ["AWDNB373685", "ZAB035-100EF-A", "Fashion Band", 3, 0], ["AWDNB366750", "ZAB041-200HD-A", "Fashion Band", 3, 0], ["AWDNB366749", "ZAB129-500EF-A", "Fashion Band", 3, 0], ["AWDNB366752", "ZAB141-200EF-B", "Fashion Band", 3, 0]], "RISK": [["AWDNB335580", "ZAB001-46II-B", "YG", "Shared Prong Band", 3, 1], ["AWDNB333333", "ZAB034-46II-B", "YG", "Single Prong Band", 2, 1]], "TO": [["SSBRC366740", "ZBR59-200EI-L", "Silver", "Silver Fashion Bracelet", 20, 9, 7, 0, 5, "New & selling"], ["AWDNB366743", "ZAB113-250FF-B", "YG", "Fashion Band", 4, 2, 2, 0, 2, "New & selling · buffer"], ["SSBRC373686", "ZBR54-96II-L", "Silver", "Silver Fashion Bracelet", 5, 5, 3, 2, 1, "New & selling"], ["AWDNB335580", "ZAB001-46II-B", "YG", "Shared Prong Band", 5, 3, 1, 0, 1, "Trending up"], ["AWDNB373682", "ZAB129-100EF-A", "WG", "Fashion Band", 3, 3, 2, 0, 1, "New & selling"], ["AWDNB333333", "ZAB034-46II-B", "YG", "Single Prong Band", 4, 2, 1, 0, 1, "Trending up · buffer"], ["AWDNB366745", "ZAB113-400FF-A", "WG", "Fashion Band", 3, 1, 1, 0, 1, "New & selling"]], "MOV": {"Single Prong Band": [["AWDNB322856", "ZAB034-30II-A", 28, 21, 22, 12, "up", 10, 20, "Covered", 0], ["AWDNB322858", "ZAB034-70II-A", 30, 36, 18, 6, "stable", 10, 12, "Covered", 0], ["AWDNB322857", "ZAB034-46II-A", 28, 29, 18, 4, "down", 8, 0, "Covered", 3], ["AWDNB322859", "ZAB034-100II-A", 29, 30, 16, 5, "stable", 10, 0, "Covered", 4], ["AWDNB322854", "ZAB034-18II-A", 16, 9, 6, 2, "up", 10, 5, "Covered", 0], ["AWDNB372925", "ZAB034-70II-B", 11, 10, 5, 0, "down", 1, 0, "Idle", 0], ["AWDNB333333", "ZAB034-46II-B", 9, 4, 4, 2, "up", 1, 0, "STOCK-OUT RISK", 1]], "Shared Prong Band": [["AWDNB293556", "ZAB001-96II-A", 35, 37, 33, 14, "stable", 7, 11, "Covered", 0], ["AWDNB293554", "ZAB001-70II-A", 33, 42, 23, 17, "up", 13, 1, "Covered", 10], ["AWDNB293550", "ZAB001-46II-A", 32, 31, 18, 2, "down", 13, 1, "Covered", 3], ["AWDNB366741", "ZAB001-146II-B", 0, 0, 6, 1, "down", 1, 2, "Covered", 0], ["AWDNB335580", "ZAB001-46II-B", 1, 5, 5, 3, "up", 1, 0, "STOCK-OUT RISK", 2], ["AWDNB316112", "ZAB001-70II-B", 2, 7, 3, 0, "down", 2, 0, "Idle", 0], ["—", "ZAB001-96II-B", 4, 5, 2, 0, "down", 0, 0, "Idle", 0]], "Fashion Band": [["AWDNB366743", "ZAB113-250FF-B", 0, 1, 4, 2, "new↑", 2, 0, "Covered", 2], ["AWDNB373682", "ZAB129-100EF-A", 0, 0, 3, 3, "new↑", 2, 0, "Watch", 3], ["AWDNB373676", "ZAB190-100EF-B", 0, 0, 3, 2, "new↑", 3, 0, "Covered", 2], ["AWDNB366745", "ZAB113-400FF-A", 0, 0, 3, 1, "down", 1, 0, "Watch", 2], ["AWDNB366742", "ZAB113-250FF-A", 0, 2, 3, 0, "down", 2, 0, "Idle", 0], ["AWDNB366746", "ZAB113-400FF-B", 0, 0, 3, 0, "down", 2, 0, "Idle", 0], ["AWDNB373681", "ZAB025-100EF-A", 0, 0, 2, 2, "new↑", 3, 0, "Covered", 2]], "Silver Fashion Bracelet": [["SSBRC366740", "ZBR59-200EI-L", 0, 9, 20, 9, "new↑", 7, 0, "Watch", 12], ["SSBRC366738", "ZBR53-100EI-L", 0, 45, 13, 4, "stable", 8, 0, "Covered", 6], ["SSBRC373687", "ZBR51-96II-L", 0, 0, 8, 6, "new↑", 6, 4, "Covered", 4], ["SSBRC373686", "ZBR54-96II-L", 0, 0, 5, 5, "new↑", 3, 2, "Watch", 4], ["—", "ZBR53-96II-L", 0, 0, 0, 0, "—", 0, 0, "Idle", 0]], "5 Stone Band": [["AWDNB322850", "YAB033-96II-A", 22, 16, 2, 1, "stable", 0, 0, "Watch", 0], ["—", "YAB033-146II-B", 2, 1, 2, 0, "down", 0, 0, "Idle", 0], ["—", "YAB033-196GI-B", 1, 0, 2, 0, "down", 0, 0, "Idle", 0], ["AWDNB329062", "YAB033-196GI-A", 6, 18, 1, 1, "up", 0, 0, "Watch", 0], ["—", "YAB033-146II-A", 17, 5, 1, 0, "down", 0, 0, "Idle", 0], ["—", "YAB033-196FF-A", 0, 0, 0, 0, "—", 0, 0, "Idle", 0], ["—", "YAB033-196GI-C", 1, 0, 0, 0, "—", 0, 0, "Idle", 0]]}, "PEND": [], "INBOUND": [["ZAB113-100BL-A", "WG", 3], ["ZAB113-100BL-B", "YG", 3], ["ZAB113-100GR-A", "WG", 3], ["ZAB113-100GR-B", "YG", 3], ["ZAB113-100PK-A", "WG", 3], ["ZAB113-100PK-C", "RG", 3], ["ZAB113-100YL-A", "WG", 3], ["ZAB113-100YL-B", "YG", 3]], "r25ja": 421369, "meta": {"years": [2024, 2025, 2026], "latest_month": 8, "latest_year": 2026, "price_points": {"bands": ["$500–800", "$801–1,200", "$1,201–2,200", "$2,201 +"], "2024": [73, 139, 111, 39], "2025": [67, 97, 204, 48], "2026": [30, 51, 107, 85]}, "lead_time_days": 47}, "totals": {"ytd": 269, "d90": 111, "newskus": 29, "newunits": 78, "deadpcs": 38}};
+
+const C = { bg:"#ffffff", card:"#f7f7f5", border:"#e0ddd8", ink:"#1a1a1a", sub:"#555", faint:"#8a8a86",
+  gold:"#9a7b3e", green:"#1a7f37", red:"#c0392b", blue:"#2f6f8f", gridline:"#ecebe7",
+  y24:"#c9c4ba", y25:"#9a7b3e", y26:"#1a1a1a" };
+const MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+const [Y0,Y1,Y2]=D.meta.years; const LM=D.meta.latest_month; const YTD=`Jan–${MONTHS[LM-1]}`;
+const LIFECYCLE = {
+  "Core · Defend":{c:C.gold,bg:"#f3ecdd",note:"Backbone volume. Protect availability; don't let it slip."},
+  "Core · Stabilizing":{c:"#7a6a4a",bg:"#efeadf",note:"Large and holding. Keep it fed — especially yellow gold."},
+  "Grow":{c:C.green,bg:"#e5f0e6",note:"Young, accelerating. Add width and stock ahead of demand."},
+  "Sunset":{c:C.red,bg:"#f6e6e3",note:"Falling. Stop replenishing; free the shelf for the new book."},
+};
+const fmt=(n)=>n>=1000?"$"+(n/1000).toFixed(n>=100000?0:1)+"k":"$"+n;
+const fmtFull=(n)=>"$"+Math.round(n).toLocaleString();
+const sum=(a)=>a.reduce((x,y)=>x+y,0);
+const pct=(a,b)=>b===0?null:(a-b)/b;
+const arrow=(v)=>v==null?"":v>0.02?"▲":v<-0.02?"▼":"▬";
+function Delta({v,suffix="%"}){ if(v==null) return <span style={{color:C.faint}}>—</span>;
+  const col=v>0.02?C.green:v<-0.02?C.red:C.faint; return <span style={{color:col,fontWeight:600}}>{arrow(v)} {(v>0?"+":"")+Math.round(v*100)+suffix}</span>; }
+function Tag({tag,small}){ const l=LIFECYCLE[tag]||LIFECYCLE["Grow"];
+  return <span style={{background:l.bg,color:l.c,fontWeight:600,fontSize:small?10:11,padding:small?"2px 7px":"3px 9px",borderRadius:3,whiteSpace:"nowrap"}}>{tag}</span>; }
+const TREND={"up":{c:C.green,l:"▲ up"},"new↑":{c:C.green,l:"★ new ↑"},"stable":{c:C.faint,l:"▬ steady"},"down":{c:C.red,l:"▼ down"},"flat":{c:C.faint,l:"▬ flat"},"—":{c:C.faint,l:"—"}};
+function TrendTag({t}){ const x=TREND[t]||TREND["—"]; return <span style={{color:x.c,fontWeight:600,fontSize:11.5}}>{x.l}</span>; }
+const STATUS={"STOCK-OUT RISK":{c:C.red,bg:"#f6e6e3"},"Dead stock":{c:"#7a6a4a",bg:"#eeeae3"},"Not moving":{c:"#7a6a4a",bg:"#eeeae3"},"Covered":{c:C.green,bg:"#e5f0e6"},"Watch":{c:C.gold,bg:"#f3ecdd"},"Idle":{c:C.faint,bg:"#f0efec"}};
+function Status({s}){ const x=STATUS[s]||STATUS.Idle; return <span style={{background:x.bg,color:x.c,fontWeight:600,fontSize:10,padding:"2px 6px",borderRadius:3,whiteSpace:"nowrap"}}>{s}</span>; }
+const MetalC={WG:"#6b7b86",YG:C.gold,RG:"#b0705a",Silver:"#7d8a94",PLT:"#555"};
+function Metal({m}){ return <span style={{color:MetalC[m]||C.sub,fontWeight:600}}>{m}</span>; }
+const mono={fontFamily:"ui-monospace,Menlo,monospace",fontSize:11.5};
+function KSKU({k}){ return <span style={{...mono,color:k==="—"?C.faint:C.gold,fontWeight:600}}>{k}</span>; }
+
+function LineOverlay({lines,w=560,h=210}){
+  const pad={l:32,r:12,t:14,b:26}, iw=w-pad.l-pad.r, ih=h-pad.t-pad.b;
+  const max=Math.max(1,...lines.flatMap(l=>l.data)); const X=(i)=>pad.l+iw*i/11, Y=(v)=>pad.t+ih-ih*v/max;
+  return <svg viewBox={`0 0 ${w} ${h}`} width="100%" style={{display:"block"}}>
+    {[0,1,2,3,4].map(i=>{const y=pad.t+ih-ih*i/4; return <g key={i}><line x1={pad.l} x2={w-pad.r} y1={y} y2={y} stroke={C.gridline}/><text x={pad.l-5} y={y+3} textAnchor="end" fontSize={9} fill={C.faint}>{Math.round(max*i/4)}</text></g>;})}
+    {MONTHS.map((m,i)=><text key={i} x={X(i)} y={h-8} textAnchor="middle" fontSize={8} fill={C.faint}>{m[0]}</text>)}
+    {lines.map((l,li)=>{ const pts=l.data.map((v,i)=>[X(i),Y(v)]); const cut=l.year===Y2?LM:12;
+      const d=pts.slice(0,cut).map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+      return <g key={li}><path d={d} fill="none" stroke={l.color} strokeWidth={l.year===Y2?2.4:1.6} strokeDasharray={l.year===Y0?"3 3":"none"}/>
+        {l.year===Y2&&pts.slice(0,cut).map((p,i)=><circle key={i} cx={p[0]} cy={p[1]} r={2} fill={l.color}/>)}</g>;})}
+  </svg>;
+}
+function Legend({items}){ return <div style={{display:"flex",gap:16,flexWrap:"wrap",marginTop:6}}>{items.map((it,i)=><span key={i} style={{display:"flex",alignItems:"center",gap:6,fontSize:11,color:C.sub}}><span style={{width:14,height:3,background:it.dash?"none":it.color,display:"inline-block",borderRadius:2,...(it.dash?{borderTop:`2px dashed ${it.color}`}:{})}}/>{it.label}</span>)}</div>; }
+function GroupedBars({series,cats,w=560,h=210}){
+  const pad={l:40,r:12,t:14,b:40}, iw=w-pad.l-pad.r, ih=h-pad.t-pad.b; const max=Math.max(1,...series.flatMap(s=>s.data)); const gW=iw/cats.length, bW=gW/(series.length+0.6);
+  return <svg viewBox={`0 0 ${w} ${h}`} width="100%" style={{display:"block"}}>
+    {[0,1,2,3,4].map(i=>{const y=pad.t+ih-ih*i/4; return <g key={i}><line x1={pad.l} x2={w-pad.r} y1={y} y2={y} stroke={C.gridline}/><text x={pad.l-6} y={y+3} textAnchor="end" fontSize={9} fill={C.faint}>{Math.round(max*i/4)}</text></g>;})}
+    {cats.map((cat,ci)=><g key={ci}>{series.map((s,si)=>{const v=s.data[ci],bh=ih*v/max,x=pad.l+ci*gW+gW*0.15+si*bW; return <rect key={si} x={x} y={pad.t+ih-bh} width={bW*0.9} height={bh} fill={s.color} rx={1}/>;})}
+      <text x={pad.l+ci*gW+gW/2} y={h-pad.b+16} textAnchor="middle" fontSize={10} fill={C.sub}>{cat}</text></g>)}
+  </svg>;
+}
+function Card({children,style}){ return <div style={{background:C.card,border:`1px solid ${C.border}`,borderRadius:6,padding:18,...style}}>{children}</div>; }
+function SectionTitle({children,sub}){ return <div style={{marginBottom:12}}><div style={{fontFamily:"Georgia,serif",fontSize:17,color:C.ink,fontWeight:600}}>{children}</div>{sub&&<div style={{fontSize:12,color:C.sub,marginTop:2}}>{sub}</div>}</div>; }
+function Note({children,accent}){ return <div style={{background:"#faf6ec",border:`1px solid ${C.border}`,borderLeft:`3px solid ${accent||C.gold}`,borderRadius:6,padding:"12px 16px",marginBottom:16,fontSize:12,color:C.sub,lineHeight:1.55}}>{children}</div>; }
+function Kpi({label,big,delta,foot}){ return <Card style={{flex:1,minWidth:180}}><div style={{fontSize:11.5,color:C.sub,marginBottom:8}}>{label}</div><div style={{fontFamily:"Georgia,serif",fontSize:30,color:C.ink,lineHeight:1}}>{big}</div><div style={{marginTop:8,fontSize:12}}>{delta}</div>{foot&&<div style={{marginTop:4,fontSize:11,color:C.faint}}>{foot}</div>}</Card>; }
+const TH=({children,r,pl})=><th style={{textAlign:r?"right":"left",padding:"5px 4px",paddingLeft:pl||4,color:C.sub,fontSize:11,fontWeight:600}}>{children}</th>;
+const TD=({children,r,pl,style})=><td style={{textAlign:r?"right":"left",padding:"7px 4px",paddingLeft:pl||4,...style}}>{children}</td>;
+
+// ============================================================================ Overview
+function Overview(){
+  const P=D.PROGRAMS, S=D.SOROW; const u25=sum(P.map(p=>p.u[1]))+S.u[1], u26=sum(P.map(p=>p.u[2]))+S.u[2], uproj=sum(P.map(p=>p.proj))+S.proj;
+  const r25=sum(P.map(p=>p.r[1]))+S.r[1], r26=sum(P.map(p=>p.r[2]))+S.r[2], rproj=sum(P.map(p=>p.rproj))+S.rproj;
+  const ytd25=sum(D.TM[2025].slice(0,8));
+  return <div>
+    <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:18}}>
+      <Kpi label={`Units sold — ${Y2} YTD (${YTD})`} big={u26} delta={<span>vs {ytd25} same period {Y1} &nbsp;<Delta v={pct(u26,ytd25)}/></span>} foot={`Full-year projection ${uproj} units (${Y1}: ${u25})`}/>
+      <Kpi label={`Estimated retail — ${Y2} YTD (${YTD})`} big={fmt(r26)} delta={<span>vs {fmt(D.r25ja)} same period {Y1} &nbsp;<Delta v={pct(r26,D.r25ja)}/></span>} foot={<span>Projected full year <b style={{color:C.ink}}>{fmt(rproj)}</b> <Delta v={pct(rproj,r25)}/> vs {Y1}</span>}/>
+      {(()=>{ const a26=r26/u26, a25=D.r25ja/ytd25, a25fy=r25/u25;
+        return <Kpi label={`Average unit retail — ${Y2} YTD`} big={fmtFull(a26)} delta={<span>vs {fmtFull(a25)} same period {Y1} &nbsp;<Delta v={pct(a26,a25)}/></span>} foot={`Est. retail ÷ units · ${Y1} full year ${fmtFull(a25fy)}`}/>; })()}
+      <Kpi label="Where growth is" big="New book" delta={<span style={{color:C.sub}}>{D.totals.newskus} styles under 12 months old = {D.totals.newunits} units, {Math.round(100*D.totals.newunits/u26)}% of YTD</span>} foot="Silver + Fashion accelerating; core flat, YG rising"/>
+    </div>
+    <Card style={{marginBottom:18}}>
+      <SectionTitle sub={`Units per month incl. special orders, three years overlaid. ${Y2} is ${YTD} actual.`}>How the business is moving</SectionTitle>
+      <LineOverlay lines={[{year:Y0,data:D.TM[Y0],color:C.y24},{year:Y1,data:D.TM[Y1],color:C.y25},{year:Y2,data:D.TM[Y2],color:C.y26}]}/>
+      <Legend items={[{label:String(Y0),color:C.y24,dash:true},{label:String(Y1),color:C.y25},{label:`${Y2} (YTD)`,color:C.y26}]}/>
+      {/*NARRATIVE*/}<div style={{fontSize:12,color:C.sub,marginTop:12,lineHeight:1.5,maxWidth:"80ch"}}>Units are tracking 2025 through August; retail is running ahead because the mix keeps trading up. December is the year — 2025 closed on an 88-unit spike — and with a 47-day production lag the holiday build has to be placed in September.</div>
+    </Card>
+    <Card>
+      <SectionTitle sub="Four-year arc, 2026 projection and lifecycle stage per program. Special orders (ZZ styles) count in unit and retail totals but sit outside every program.">Program scorecard</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:13}}><thead><tr><TH>Program</TH><TH>Stage</TH><TH r>{Y0}</TH><TH r>{Y1}</TH><TH r>{Y2} YTD</TH><TH r>{Y2} proj</TH><TH r>vs '{String(Y1).slice(2)}</TH><TH r pl={14}>Est. retail '{String(Y1).slice(2)}</TH><TH r>Proj '{String(Y2).slice(2)}</TH></tr></thead>
+      <tbody>{P.map((p,i)=><tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD style={{fontWeight:600,color:C.ink}}>{p.name}</TD><TD><Tag tag={p.tag} small/></TD><TD r style={{color:C.sub}}>{p.u[0]||"—"}</TD><TD r style={{color:C.sub}}>{p.u[1]||"—"}</TD><TD r style={{fontWeight:600}}>{p.u[2]}</TD><TD r>{p.proj}</TD><TD r><Delta v={pct(p.proj,p.u[1])}/></TD><TD r pl={14} style={{color:C.sub}}>{p.r[1]?fmt(p.r[1]):"—"}</TD><TD r>{fmt(p.rproj)}</TD></tr>)}
+        <tr style={{borderTop:`1px solid ${C.border}`,color:C.sub}}><TD style={{fontWeight:600}}>{S.name}<span style={{display:"block",fontWeight:400,fontSize:10.5,color:C.faint}}>counted in totals, not a program · retail est. at 2.5× cost</span></TD><TD><span style={{fontSize:10,color:C.faint}}>Special order</span></TD><TD r>{S.u[0]}</TD><TD r>{S.u[1]}</TD><TD r style={{fontWeight:600,color:C.ink}}>{S.u[2]}</TD><TD r>{S.proj}</TD><TD r><Delta v={pct(S.proj,S.u[1])}/></TD><TD r pl={14}>{fmt(S.r[1])}</TD><TD r>{fmt(S.rproj)}</TD></tr>
+        <tr style={{borderTop:`2px solid ${C.gold}`,fontWeight:700}}><TD>Total (programs + special orders)</TD><TD/><TD r>{sum(P.map(p=>p.u[0]))+S.u[0]}</TD><TD r>{u25}</TD><TD r>{u26}</TD><TD r>{uproj}</TD><TD r><Delta v={pct(uproj,u25)}/></TD><TD r pl={14}>{fmt(r25)}</TD><TD r>{fmt(rproj)}</TD></tr></tbody></table>
+    </Card>
+  </div>;
+}
+
+// ============================================================================ Programs
+function Programs({internal}){
+  const [sel,setSel]=useState("Single Prong Band"); const p=D.PROGRAMS.find(x=>x.name===sel), m=D.PM[sel], rows=D.MOV[sel], l=LIFECYCLE[p.tag], ms=D.MET[sel];
+  const wg=ms.ytd.WG, yg=ms.ytd.YG, rg=ms.ytd.RG, sv=ms.ytd.Silver, tot=wg+yg+rg;
+  return <div>
+    <div style={{display:"flex",gap:8,flexWrap:"wrap",marginBottom:16}}>{D.PROGRAMS.map(pr=><button key={pr.name} onClick={()=>setSel(pr.name)} style={{padding:"7px 13px",fontSize:12.5,borderRadius:5,cursor:"pointer",border:`1px solid ${sel===pr.name?C.gold:C.border}`,background:sel===pr.name?C.gold:C.bg,color:sel===pr.name?"#fff":C.sub,fontWeight:sel===pr.name?600:400}}>{pr.name}</button>)}</div>
+    <div style={{display:"flex",gap:16,marginBottom:16,flexWrap:"wrap"}}>
+      <Card style={{flex:"2 1 380px"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline"}}><SectionTitle sub={`Units per month, ${Y0}–${Y2} overlaid.`}>{sel}</SectionTitle><Tag tag={p.tag}/></div>
+        <LineOverlay lines={[{year:Y0,data:m[Y0],color:C.y24},{year:Y1,data:m[Y1],color:C.y25},{year:Y2,data:m[Y2],color:C.y26}]}/><Legend items={[{label:String(Y0),color:C.y24,dash:true},{label:String(Y1),color:C.y25},{label:`${Y2} (YTD)`,color:C.y26}]}/></Card>
+      <Card style={{flex:"1 1 230px",display:"flex",flexDirection:"column",gap:12}}>
+        <div><div style={{fontSize:11,color:C.sub}}>{Y2} projected units</div><div style={{fontFamily:"Georgia,serif",fontSize:30}}>{p.proj} <span style={{fontSize:13}}><Delta v={pct(p.proj,p.u[1])}/></span></div><div style={{fontSize:11,color:C.faint}}>vs {p.u[1]} in {Y1} · projected retail {fmt(p.rproj)}</div></div>
+        <div style={{background:l.bg,borderRadius:5,padding:"10px 12px"}}><div style={{fontSize:11,fontWeight:700,color:l.c}}>{p.tag}</div><div style={{fontSize:11.5,color:C.sub,lineHeight:1.45}}>{l.note}</div></div>
+        <div style={{borderTop:`1px solid ${C.border}`,paddingTop:10}}>
+          <div style={{fontSize:11,color:C.sub,marginBottom:6}}>Metal mix — {Y2} YTD units {ms.ygGrow&&<span style={{color:C.gold,fontWeight:700,marginLeft:4}}>● yellow gold trending up</span>}</div>
+          {sv>0&&tot===0 ? <div style={{fontSize:12.5}}>Silver — {sv} units (all-silver program)</div> : <>
+            <div style={{display:"flex",height:22,borderRadius:3,overflow:"hidden",marginBottom:6}}><div style={{width:`${tot?wg/tot*100:0}%`,background:"#b9c4cc"}}/><div style={{width:`${tot?yg/tot*100:0}%`,background:C.gold}}/><div style={{width:`${tot?rg/tot*100:0}%`,background:"#d4a08a"}}/></div>
+            <div style={{display:"flex",justifyContent:"space-between",fontSize:11.5,color:C.sub}}><span><b style={{color:"#6b7b86"}}>WG</b> {wg} ({tot?Math.round(wg/tot*100):0}%)</span><span><b style={{color:C.gold}}>YG</b> {yg} ({tot?Math.round(yg/tot*100):0}%)</span>{rg>0&&<span><b style={{color:"#b0705a"}}>RG</b> {rg}</span>}</div>
+            <div style={{fontSize:10.5,color:C.faint,marginTop:5}}>Last 90 days: WG {ms.d90.WG} · YG {ms.d90.YG}{ms.d90.RG?` · RG ${ms.d90.RG}`:""} &nbsp;|&nbsp; {Y1} YG full year: {ms.yg25}</div></>}
+        </div>
+        {(()=>{ const a26=p.u[2]>0?p.r[2]/p.u[2]:null, a25=p.u[1]>0?p.r[1]/p.u[1]:null, a24=p.u[0]>0?p.r[0]/p.u[0]:null;
+          return <div style={{borderTop:`1px solid ${C.border}`,paddingTop:10}}>
+            <div style={{fontSize:11,color:C.sub,marginBottom:4}}>Average unit retail — est. retail ÷ units</div>
+            <div style={{fontFamily:"Georgia,serif",fontSize:24,color:C.ink}}>{a26?fmtFull(a26):"—"} <span style={{fontSize:13}}>{a25&&a26?<Delta v={pct(a26,a25)}/>:null}</span></div>
+            <div style={{fontSize:10.5,color:C.faint}}>{Y2} YTD{a25?` · ${Y1}: ${fmtFull(a25)}`:""}{a24?` · ${Y0}: ${fmtFull(a24)}`:""}</div>
+          </div>; })()}
+      </Card>
+    </div>
+    <Card><SectionTitle sub={`Top styles by ${Y2} sales. Kessler On Hand = across 9 stores (month end). On Order = inbound from ALTR. Status is the ordering read.${internal?" ALTR On Hand = NY stock to hold (internal).":""}`}>Style detail</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}><thead><tr><TH>Kessler SKU</TH><TH>ALTR SKU</TH><TH r>{Y0}</TH><TH r>{Y1}</TH><TH r>{Y2} YTD</TH><TH r>Last 90d</TH><TH r>90-day trend</TH><TH r pl={14}>Kessler On Hand</TH><TH r>On Order</TH><TH>Status</TH>{internal&&<TH r>ALTR On Hand</TH>}</tr></thead>
+      <tbody>{rows.map((r,i)=>{const [k,sku,a,b,c,s90,tr,koh,oo,st,altr]=r; return <tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD><KSKU k={k}/></TD><TD style={mono}>{sku}</TD><TD r style={{color:C.sub}}>{a}</TD><TD r style={{color:C.sub}}>{b}</TD><TD r style={{fontWeight:600}}>{c}</TD><TD r style={{color:C.sub}}>{s90}</TD><TD r><TrendTag t={tr}/></TD><TD r pl={14} style={{color:koh===0?C.red:C.sub,fontWeight:koh===0?700:400}}>{koh}</TD><TD r style={{color:oo>0?C.green:C.faint,fontWeight:oo>0?600:400}}>{oo}</TD><TD><Status s={st}/></TD>{internal&&<TD r style={{fontWeight:700,fontSize:14}}>{altr}</TD>}</tr>;})}
+        <tr style={{borderTop:`2px solid ${C.gold}`,fontWeight:700}}><TD>{sel} — top styles</TD><TD/><TD/><TD/><TD r>{sum(rows.map(r=>r[4]))}</TD><TD r style={{color:C.sub}}>{sum(rows.map(r=>r[5]))}</TD><TD/><TD r pl={14}>{sum(rows.map(r=>r[7]))}</TD><TD r style={{color:C.green}}>{sum(rows.map(r=>r[8]))}</TD><TD/>{internal&&<TD r style={{fontSize:14}}>{sum(rows.map(r=>r[10]))}</TD>}</tr></tbody></table>
+      <div style={{fontSize:10.5,color:C.faint,marginTop:8}}>Where Kessler opened two item numbers for one style, sales are merged and the number with stock on hand is shown.</div></Card>
+  </div>;
+}
+
+// ============================================================================ Momentum (NEW)
+function Momentum(){
+  return <div>
+    <Note accent={C.green}><b style={{color:C.ink}}>The best-selling styles that are trending up — across all programs.</b> Ranked by units in the last 90 days. "★ new ↑" = launched under 12 months ago and accelerating; "▲ up" = established style running above its 6-month pace. Read this alongside On Hand and On Order: a rising style with thin cover is the buy.</Note>
+    <Card><SectionTitle sub={`Top ${D.MOM.length} styles by 90-day velocity (${MONTHS[(LM+9)%12]}–${MONTHS[LM-1]} ${Y2}).`}>Momentum board</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}><thead><tr><TH>#</TH><TH>Kessler SKU</TH><TH>ALTR SKU</TH><TH>Metal</TH><TH>Program</TH><TH r>Age (mo)</TH><TH r>{Y2} YTD</TH><TH r>Last 90d</TH><TH r>Trend</TH><TH r pl={14}>On Hand</TH><TH r>On Order</TH><TH>Status</TH></tr></thead>
+      <tbody>{D.MOM.map((r,i)=>{const [k,sku,mt,pg,age,u26,s90,tr,oh,oo,st]=r; return <tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD style={{color:C.faint}}>{i+1}</TD><TD><KSKU k={k}/></TD><TD style={mono}>{sku}</TD><TD><Metal m={mt}/></TD><TD style={{color:C.sub}}>{pg.replace(" Band","").replace(" Fashion Bracelet"," Bracelet")}</TD><TD r style={{color:age<=12?C.green:C.sub,fontWeight:age<=12?600:400}}>{age}</TD><TD r style={{color:C.sub}}>{u26}</TD><TD r style={{fontWeight:700,fontSize:14}}>{s90}</TD><TD r><TrendTag t={tr}/></TD><TD r pl={14} style={{color:oh<=1?C.red:C.sub,fontWeight:oh<=1?700:400}}>{oh}</TD><TD r style={{color:oo>0?C.green:C.faint}}>{oo}</TD><TD><Status s={st}/></TD></tr>;})}</tbody></table>
+      {/*NARRATIVE*/}<div style={{fontSize:11.5,color:C.sub,marginTop:12,lineHeight:1.5,maxWidth:"82ch"}}>The core white-gold runs (ZAB001-70/96, ZAB034-30) lead on volume and are covered by the inbound orders. The momentum story is below them: silver bracelets ZBR51 and ZBR54 are the fastest new styles on the board, and the yellow-gold core variants (ZAB001-46II-B, ZAB034-46II-B) are rising with almost nothing on the shelf.</div></Card>
+  </div>;
+}
+
+// ============================================================================ What to Order (rebuilt)
+function ToOrder(){
+  const totU=sum(D.TO.map(r=>r[8])); const byMetal=D.TO.reduce((a,r)=>{a[r[2]]=(a[r[2]]||0)+r[8];return a;},{});
+  return <div>
+    {D.RISK.length>0&&<div style={{background:"#f6e6e3",border:`1px solid #e6c6c0`,borderRadius:6,padding:"12px 16px",marginBottom:14}}>
+      <div style={{fontSize:12,fontWeight:700,color:C.red,marginBottom:6}}>Stock-out risk — selling, ≤1 on hand, nothing on order</div>
+      <div style={{display:"flex",gap:18,flexWrap:"wrap"}}>{D.RISK.map((r,i)=><span key={i} style={{fontSize:12.5}}><span style={mono}>{r[1]}</span> <Metal m={r[2]}/> <span style={{color:C.sub}}>· {r[3].replace(" Band","")} · {r[4]} sold in 90d · {r[5]} on hand</span></span>)}</div></div>}
+    <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:14}}>
+      <Kpi label="Order now" big={`${totU} pcs`} delta={<span style={{color:C.sub}}>{D.TO.length} styles</span>} foot="Net of on-hand and on-order · whole units"/>
+      <Kpi label="By metal" big={<span style={{fontSize:20}}>YG {byMetal.YG||0} · WG {byMetal.WG||0} · Silver {byMetal.Silver||0}</span>} delta={<span style={{color:C.sub}}>yellow gold and new styles</span>}/>
+      <Kpi label="Stock-out risk" big={`${D.RISK.length} styles`} delta={<span style={{color:D.RISK.length?C.red:C.sub,fontWeight:600}}>{D.RISK.length?"selling with ≤1 on hand, nothing on order":"none right now"}</span>} foot="Listed above — order first"/>
+    </div>
+    <Note><b style={{color:C.ink}}>How this list is built.</b> Every style in the five programs is evaluated fresh each month — no prior list is carried over. <b>New styles</b> (under 12 months): order if ≥2 sold in the last 90 days, or ≥2 sold this year with ≤1 on hand; sized on 90-day momentum with the holiday uplift, minimum 2. <b>Core / grow</b> styles: order if more than 1 sold in 180 days and trending up or steady. <b>Sunset</b>: only if ≥3 sold in 90 days. Quantities are 60-day cover built up for the Nov–Dec peak, minus on-hand, minus on-order; a selling style with no headroom gets at least 1 buffer. <b style={{color:C.red}}>Pending:</b> per-SKU base stock levels by store.</Note>
+    <Card style={{marginBottom:16}}><SectionTitle sub="Order sheet for Monica. Why = the rule that put it here.">What to order now</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}><thead><tr><TH>Kessler SKU</TH><TH>ALTR SKU</TH><TH>Metal</TH><TH>Program</TH><TH r>{Y2} Sales</TH><TH r>Sales 90d</TH><TH r pl={12}>On Hand</TH><TH r>On Order</TH><TH r>Order Qty</TH><TH pl={12}>Why</TH></tr></thead>
+      <tbody>{D.TO.map((r,i)=>{const [k,sku,mt,pg,u26,s90,oh,oo,q,why]=r; return <tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD><KSKU k={k}/></TD><TD style={mono}>{sku}</TD><TD><Metal m={mt}/></TD><TD style={{color:C.sub}}>{pg.replace(" Band","").replace(" Fashion Bracelet"," Bracelet")}</TD><TD r style={{color:C.sub}}>{u26}</TD><TD r style={{fontWeight:600}}>{s90}</TD><TD r pl={12} style={{color:oh<=1?C.red:C.sub,fontWeight:oh<=1?700:400}}>{oh}</TD><TD r style={{color:oo>0?C.green:C.faint}}>{oo}</TD><TD r style={{fontWeight:700,fontSize:14}}>{q}</TD><TD pl={12} style={{fontSize:11,color:C.sub}}>{why}</TD></tr>;})}
+        <tr style={{borderTop:`2px solid ${C.gold}`,fontWeight:700}}><TD colSpan={8}>Total to order</TD><TD r style={{fontSize:14}}>{totU}</TD><TD/></tr></tbody></table>
+      {/*NARRATIVE*/}<div style={{fontSize:10.5,color:C.faint,marginTop:8}}>Short list on purpose: the core is already covered by 88 pieces inbound. What's left is the yellow-gold core variants and the new styles that are selling into empty shelves.</div></Card>
+    {D.PEND.length>0&&<Card style={{borderLeft:`3px solid ${C.blue}`}}><SectionTitle sub="New styles appeared in the Kessler feed that aren't assigned to a program. They're excluded from every calculation until classified.">New SKUs — needs your call</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}><thead><tr><TH>Style (as in Kessler feed)</TH><TH>Kessler SKU</TH><TH r>Aug sold</TH><TH r>On hand</TH><TH pl={14}>Classify as</TH></tr></thead>
+      <tbody>{D.PEND.map((r,i)=><tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD style={mono}>{r[0]}</TD><TD><KSKU k={r[1]}/></TD><TD r>{r[2]}</TD><TD r>{r[3]}</TD><TD pl={14} style={{fontSize:11,color:C.sub}}>Special Order &nbsp;·&nbsp; Program name &nbsp;·&nbsp; Ignore</TD></tr>)}</tbody></table></Card>}
+  </div>;
+}
+
+// ============================================================================ Stock Health (customer-safe)
+function StockHealth(){
+  const S=D.STOCK; const tK=sum(S.map(s=>s.koh)), tO=sum(S.map(s=>s.oo)), tD=sum(S.map(s=>s.dead));
+  return <div>
+    <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:16}}>
+      <Kpi label={`Kessler On Hand (9 stores, end of ${MONTHS[LM-1]})`} big={`${tK} pcs`} delta={<span style={{color:C.sub}}>across the five programs</span>}/>
+      <Kpi label="On order from ALTR" big={`${tO} pcs`} delta={<span style={{color:C.sub}}>due Sep 3 – Oct 5</span>} foot="Lands ahead of the holiday"/>
+      <Kpi label="Dead stock" big={`${tD} pcs`} delta={<span style={{color:C.red,fontWeight:600}}>{D.DEAD.length} styles, 0 sold in 180 days</span>} foot="All in Fashion — 10 styles, prune candidates"/>
+    </div>
+    <Card style={{marginBottom:16}}><SectionTitle sub="What Kessler holds, what's inbound, how fast it turns. Days on hand = on-hand ÷ daily sell-through (their Tally report); high is slow.">Stock health by program</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}><thead><tr><TH>Program</TH><TH>Stage</TH><TH r>Styles</TH><TH r>Selling (90d)</TH><TH r pl={14}>On Hand</TH><TH r>On Order</TH><TH r>Days on hand</TH><TH r>Aged pcs</TH><TH r>Dead pcs</TH><TH r>Stock-out risk</TH></tr></thead>
+      <tbody>{S.map((s,i)=><tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD style={{fontWeight:600}}>{s.name}</TD><TD><Tag tag={s.tag} small/></TD><TD r style={{color:C.sub}}>{s.skus}</TD><TD r style={{color:C.sub}}>{s.active}</TD><TD r pl={14} style={{fontWeight:600}}>{s.koh}</TD><TD r style={{color:s.oo>0?C.green:C.faint,fontWeight:s.oo>0?600:400}}>{s.oo}</TD><TD r style={{color:s.doh>250?C.red:s.doh<60?C.green:C.sub,fontWeight:s.doh>250?600:400}}>{s.doh}</TD><TD r style={{color:C.sub}}>{s.aged}</TD><TD r style={{color:s.dead>0?C.red:C.faint,fontWeight:s.dead>0?700:400}}>{s.dead}</TD><TD r style={{color:s.risk>0?C.red:C.faint,fontWeight:s.risk>0?700:400}}>{s.risk}</TD></tr>)}
+        <tr style={{borderTop:`2px solid ${C.gold}`,fontWeight:700}}><TD>Total</TD><TD/><TD r>{sum(S.map(s=>s.skus))}</TD><TD r>{sum(S.map(s=>s.active))}</TD><TD r pl={14}>{tK}</TD><TD r style={{color:C.green}}>{tO}</TD><TD/><TD r>{sum(S.map(s=>s.aged))}</TD><TD r style={{color:C.red}}>{tD}</TD><TD r style={{color:C.red}}>{sum(S.map(s=>s.risk))}</TD></tr></tbody></table>
+      {/*NARRATIVE*/}<div style={{fontSize:11.5,color:C.sub,marginTop:12,lineHeight:1.5,maxWidth:"82ch"}}>Single Prong sits long (387 days) with a big order inbound — deep, not short. 5 Stone is effectively out and effectively over. Fashion is the one to manage: 61 on hand, of which 38 are dead — the wide launch produced clear winners and clear losers.</div></Card>
+    <Card><SectionTitle sub="≥3 on hand, zero sold in 180 days. Candidates to consolidate, return, or clear — and to stop reordering.">Dead stock</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}><thead><tr><TH>Kessler SKU</TH><TH>ALTR SKU</TH><TH>Program</TH><TH r>On Hand</TH><TH r>Sold 180d</TH></tr></thead>
+      <tbody>{D.DEAD.map((r,i)=><tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD><KSKU k={r[0]}/></TD><TD style={mono}>{r[1]}</TD><TD style={{color:C.sub}}>{r[2]}</TD><TD r style={{fontWeight:600}}>{r[3]}</TD><TD r style={{color:C.red}}>{r[4]}</TD></tr>)}</tbody></table>
+      {/*NARRATIVE*/}<div style={{fontSize:11,color:C.sub,marginTop:8}}>Pattern: the larger-carat fashion (500FF, 200FF, 300IH), the 041/141 200-series, and the 027/035/041 100EF in white gold didn't move. The winners are 1.00–1.50 ct EF/FF, disproportionately yellow gold.</div></Card>
+  </div>;
+}
+
+// ============================================================================ New Launches (NEW)
+function NewLaunches(){
+  const ORDER=["Single Prong Band","Shared Prong Band","Fashion Band","Silver Fashion Bracelet","5 Stone Band"];
+  const groups=ORDER.map(pg=>[pg,D.NEW.filter(r=>r[3]===pg).sort((a,b)=>b[5]-a[5]||b[6]-a[6])]).filter(g=>g[1].length);
+  const lbl=(st)=>st==="Dead stock"?"Not moving":st;
+  return <div>
+    <Note accent={C.blue}><b style={{color:C.ink}}>Every style under 12 months old, grouped by program, with sell-through since launch.</b> {D.totals.newskus} styles have produced {D.totals.newunits} units this year — about a quarter of all volume. Sell-through % = sold ÷ (sold + on hand). This is the re-buy vs. drop view.</Note>
+    <Card style={{marginBottom:16}}><SectionTitle sub={`Grouped by program; sorted by ${Y2} sales within each.`}>Launch performance</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12}}><thead><tr><TH>Kessler SKU</TH><TH>ALTR SKU</TH><TH>Metal</TH><TH r>Age (mo)</TH><TH r>Sold {Y2}</TH><TH r>Last 90d</TH><TH r>Trend</TH><TH r pl={12}>On Hand</TH><TH r>On Order</TH><TH r>Sell-through</TH><TH>Status</TH></tr></thead>
+      <tbody>{groups.map(([pg,rows])=>[
+        <tr key={pg}><td colSpan={11} style={{padding:"10px 4px 4px",fontFamily:"Georgia,serif",fontSize:13.5,fontWeight:600,color:C.gold,borderBottom:`1px solid ${C.gold}`}}>{pg} <span style={{fontFamily:"system-ui,sans-serif",fontSize:11,color:C.faint,fontWeight:400,marginLeft:8}}>{rows.length} new styles · {sum(rows.map(r=>r[5]))} sold {Y2}</span></td></tr>,
+        ...rows.map((r,i)=>{const [k,sku,mt,_pg,age,u26,s90,tr,oh,oo,stp,st]=r; return <tr key={pg+i} style={{borderTop:`1px solid ${C.border}`}}><TD><KSKU k={k}/></TD><TD style={mono}>{sku}</TD><TD><Metal m={mt}/></TD><TD r style={{color:C.sub}}>{age}</TD><TD r style={{fontWeight:600}}>{u26}</TD><TD r>{s90}</TD><TD r><TrendTag t={tr}/></TD><TD r pl={12} style={{color:oh<=1&&s90>0?C.red:C.sub}}>{oh}</TD><TD r style={{color:oo>0?C.green:C.faint}}>{oo}</TD><TD r style={{color:stp>=60?C.green:stp<=20&&oh>=3?C.red:C.sub,fontWeight:600}}>{stp}%</TD><TD><Status s={lbl(st)}/></TD></tr>;})
+      ])}</tbody></table></Card>
+    <Card><SectionTitle sub="On order, not yet in the sales feed. The Fashion color run — treat as a test.">Inbound new styles</SectionTitle>
+      <div style={{display:"flex",gap:10,flexWrap:"wrap"}}>{D.INBOUND.map((r,i)=><span key={i} style={{background:C.bg,border:`1px solid ${C.border}`,borderRadius:4,padding:"6px 10px",fontSize:12}}><span style={mono}>{r[0]}</span> <Metal m={r[1]}/> <span style={{color:C.sub}}>× {r[2]}</span></span>)}</div>
+      <div style={{fontSize:11,color:C.sub,marginTop:10}}>24 pieces across 8 colorways (blue, green, pink, yellow) in WG/YG/RG. First read on which colors and metals move should drive the next re-buy.</div></Card>
+  </div>;
+}
+
+// ============================================================================ Playbook (rebuilt)
+function Playbook(){
+  const plays=[
+    ["1","Lock the Q4 core on yellow gold",C.gold,"Shared + Single Prong are 75% of volume and covered on white gold. The only stock-outs in the book are ZAB001-46II-B and ZAB034-46II-B — both YG, both rising. Order now; seed YG on the top three runs of each program (96/70/46 and 30/46/70).","Protects ~190 units/yr of core volume; YG is where the incremental unit comes from."],
+    ["2","Scale silver — the cheapest growth lever",C.green,"28 YTD, 17 in the last 90 days, on a 5-style base. ZBR51 and ZBR54 are the fastest new styles on the board. Add 2–3 styles (cttw/length), seed 3–4 each ahead of Nov. Last Nov–Dec did 35 units on two styles.","Estimated retail at 2.5× cost. Q4 upside 15–25 units."],
+    ["3","Prune and concentrate Fashion",C.green,"25 styles, 27 units, 38 pieces dead across 10 styles. Winners: 1.00–1.50 ct EF/FF, disproportionately YG, plus ZAB129/121/190 100EF. Losers: 500FF, 200FF, 027/035 100EF in white. Stop reordering the six dead styles; consolidate; redirect to winners in YG.","Turns a wide launch into a focused program; frees ~38 pcs of shelf."],
+    ["4","Watch rose gold",C.blue,"It just appeared: ZAB181-150EF-B rose variant sold its only unit; ZAB113-100PK-C is inbound. Too early to bet, but a third fashion metal is worth a line.","Optionality — decide on the next re-buy."],
+    ["5","Retire 5 Stone cleanly",C.red,"8 YTD, 2 in 90 days, 1 on hand across 14 styles. Stop replenishing; free the shelf for silver and fashion. Plan it for the January reset, not December.","Removes 14 idle styles from the assortment."],
+    ["6","Be stocked for December",C.gold,"December is ~1.8× a normal month and last year closed on an 88-unit spike. ALTR holds NY stock for Kessler, so the ask is simple: confirm the 88 pieces on order land as scheduled (Sep 3 – Oct 5), and keep the yellow-gold core variants and silver in stock through the peak.","December is the year — availability is the lever."],
+    ["7","Hold the $1,201–2,200 retail band",C.gold,"The $2,201+ tier is growing fast — heavier stones and the Shared Prong mix. Retail is up 27% same-period on 11% more units, so trade-up is doing the work. Keep width where the money is.","Mix, not volume, is carrying retail growth this year."],
+  ];
+  return <div>
+    <Note><b style={{color:C.ink}}>The growth playbook — seven plays, in priority order.</b> Built from the data: the core is healthy and covered; all incremental growth is in silver, fashion and yellow gold, and a quarter of this year's volume came from styles under a year old. Directional Q4 upside from the new book: 30–40 units, roughly $50–70k estimated retail, without touching the core.</Note>
+    <div style={{display:"flex",flexDirection:"column",gap:10}}>{plays.map((p,i)=><Card key={i} style={{borderLeft:`4px solid ${p[2]}`,padding:"14px 18px"}}><div style={{display:"flex",gap:14}}><div style={{fontFamily:"Georgia,serif",fontSize:22,color:p[2],width:28,flexShrink:0}}>{p[0]}</div><div style={{flex:1}}><div style={{fontSize:14,fontWeight:700,color:C.ink,marginBottom:4}}>{p[1]}</div><div style={{fontSize:12.5,color:C.sub,lineHeight:1.55}}>{p[3]}</div><div style={{fontSize:11.5,color:p[2],marginTop:6,fontWeight:600}}>{p[4]}</div></div></div></Card>)}</div>
+    <Card style={{marginTop:16}}><SectionTitle sub={`Units by estimated-retail price band (cost × 2.5), ${Y0}–${Y2} YTD.`}>Where the demand is — retail price points</SectionTitle>
+      <GroupedBars cats={D.meta.price_points.bands} series={[{data:D.meta.price_points[String(Y0)],color:C.y24},{data:D.meta.price_points[String(Y1)],color:C.y25},{data:D.meta.price_points[String(Y2)],color:C.y26}]}/>
+      <Legend items={[{label:String(Y0),color:C.y24},{label:String(Y1),color:C.y25},{label:`${Y2} YTD`,color:C.y26}]}/></Card>
+  </div>;
+}
+
+// ============================================================================ ALTR Build (INTERNAL)
+function Build(){
+  const B=D.BUILD; const tA=sum(B.map(b=>b.altr));
+  return <div>
+    <Note accent={C.red}><b style={{color:C.red}}>Internal — not for the customer deck.</b> ALTR On Hand = whole-unit NY stock to hold for 60-day next-day fulfillment, built up for the Nov–Dec peak (holiday multiplier: core 1.0–1.1×, Fashion 1.5×, Silver 2.0×, Sunset none), netted per style against Kessler's on-order. The 90/180-day reads are the raw velocity bases.</Note>
+    <div style={{display:"flex",gap:12,flexWrap:"wrap",marginBottom:16}}>
+      <Kpi label="ALTR On Hand — to hold in NY" big={`${tA} pcs`} delta={<span style={{color:C.sub}}>peak-built, net of on-order, per style</span>}/>
+      <Kpi label="Kessler on order" big={`${sum(B.map(b=>b.oo))} pcs`} delta={<span style={{color:C.sub}}>to ship Sep 3 – Oct 5</span>} foot="Production commitments first"/>
+      <Kpi label="Refill lead time" big="47 days" delta={<span style={{color:C.sub}}>production-to-stock</span>}/>
+    </div>
+    <Card><SectionTitle sub="Per program. Peak target = 60-day cover × holiday multiplier over the selling styles.">NY build plan</SectionTitle>
+      <table style={{width:"100%",borderCollapse:"collapse",fontSize:12.5}}><thead><tr><TH>Program</TH><TH r>90-day read</TH><TH r>180-day read</TH><TH r>Peak target</TH><TH r>Kessler on order</TH><TH r pl={14}>ALTR On Hand</TH></tr></thead>
+      <tbody>{B.map((b,i)=><tr key={i} style={{borderTop:`1px solid ${C.border}`}}><TD style={{fontWeight:600}}>{b.name}</TD><TD r style={{color:C.sub}}>{b.d90}</TD><TD r style={{color:C.sub}}>{b.d180}</TD><TD r>{b.peak}</TD><TD r style={{color:C.green}}>{b.oo}</TD><TD r pl={14} style={{fontWeight:700,fontSize:14}}>{b.altr}</TD></tr>)}
+        <tr style={{borderTop:`2px solid ${C.gold}`,fontWeight:700}}><TD>Total</TD><TD r>{sum(B.map(b=>b.d90))}</TD><TD r>{sum(B.map(b=>b.d180))}</TD><TD r>{sum(B.map(b=>b.peak))}</TD><TD r style={{color:C.green}}>{sum(B.map(b=>b.oo))}</TD><TD r pl={14} style={{fontSize:14}}>{tA}</TD></tr></tbody></table>
+      {/*NARRATIVE*/}<div style={{fontSize:11.5,color:C.sub,marginTop:12,lineHeight:1.5,maxWidth:"82ch"}}>Netting is per style, so one style's on-order can't cover another's gap — that's why Single Prong still needs 9 despite 37 inbound (those are the 30/70/18 runs; the gap is 46/100). Fashion's 30 inbound are new colorways, not cover for existing winners. The style-level ALTR On Hand column is on the Programs tab in this view.</div></Card>
+  </div>;
+}
+
+// ============================================================================ Shell
+function App(){
+  const [tab,setTab]=useState("Overview"); const [internal,setInternal]=useState(false);
+  const tabs=["Overview","Programs","Momentum","What to Order","New Launches","Stock Health","Playbook"].concat(internal?["ALTR Build"]:[]);
+  const views={Overview:<Overview/>,Programs:<Programs internal={internal}/>,Momentum:<Momentum/>,"What to Order":<ToOrder/>,"New Launches":<NewLaunches/>,"Stock Health":<StockHealth/>,Playbook:<Playbook/>,"ALTR Build":<Build/>};
+  if(!tabs.includes(tab)) setTab("Overview");
+  return <div style={{background:C.bg,minHeight:"100vh",color:C.ink,fontFamily:"system-ui,-apple-system,Segoe UI,Roboto,sans-serif",padding:"22px 26px"}}><div style={{maxWidth:1100,margin:"0 auto"}}>
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",borderBottom:`2px solid ${C.gold}`,paddingBottom:14,marginBottom:18,flexWrap:"wrap",gap:10}}>
+      <div><div style={{fontFamily:"Georgia,serif",fontSize:24,fontWeight:600}}>Kessler's Diamond Center <span style={{color:C.gold}}>·</span> Growth Dashboard</div>
+        <div style={{fontSize:12.5,color:C.sub,marginTop:3}}>ALTR band & bracelet programs &nbsp;|&nbsp; {Y0} · {Y1} · {Y2} YTD through {MONTHS[LM-1]} &nbsp;|&nbsp; 9 stores &nbsp;|&nbsp; estimated retail = cost × 2.5</div></div>
+      <div style={{textAlign:"right"}}><div style={{fontSize:11,color:C.faint,lineHeight:1.6}}>Prepared for Bekki (Merchandising) & Monica (Buying)<br/>Updated monthly · v6.5 · Sep 1, 2026</div>
+        <button onClick={()=>setInternal(v=>!v)} style={{marginTop:6,fontSize:11,padding:"4px 10px",borderRadius:4,cursor:"pointer",border:`1px solid ${internal?C.red:C.border}`,background:internal?"#f6e6e3":C.bg,color:internal?C.red:C.sub,fontWeight:600}}>{internal?"Internal view — ON":"Customer view"}</button></div>
+    </div>
+    <div style={{display:"flex",gap:4,marginBottom:20,flexWrap:"wrap"}}>{tabs.map(t=><button key={t} onClick={()=>setTab(t)} style={{padding:"9px 14px",fontSize:13,cursor:"pointer",borderRadius:5,border:`1px solid ${tab===t?(t==="ALTR Build"?C.red:C.gold):C.border}`,background:tab===t?(t==="ALTR Build"?C.red:C.gold):C.bg,color:tab===t?"#fff":C.sub,fontWeight:tab===t?600:500}}>{t}</button>)}</div>
+    {views[tab]}
+    <div style={{fontSize:10.5,color:C.faint,marginTop:24,borderTop:`1px solid ${C.border}`,paddingTop:10,lineHeight:1.6}}>Units net of returns. 2026 full-year figures are seasonality projections from Jan–Aug actuals; Estimated retail = ALTR cost × 2.5. Order logic recomputed monthly from the full SKU universe. Kessler SKU shown is the item number with stock on hand where a style has more than one. Styles beginning ZZ are special orders: counted in unit and retail totals, excluded from programs. — ALTR Created Diamonds</div>
+  </div></div>;
+}
+
+
+    const root = ReactDOM.createRoot(document.getElementById("root"));
+    root.render(<App />);
+  </script>
+</body>
+</html>
